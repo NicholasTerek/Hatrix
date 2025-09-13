@@ -55,12 +55,18 @@ echo Running Performance Benchmark...
 .\Release\performance_benchmark.exe --benchmark_format=console
 
 echo.
+echo Running Advanced Benchmark...
+.\Release\advanced_benchmark.exe --benchmark_format=console
+
+echo.
 echo Build completed successfully!
 echo.
 echo Executables created:
 echo   - test_hadamard_gtest.exe (Google Test tests)
+echo   - test_performance_gtest.exe (Performance tests)
 echo   - benchmark_hadamard_gbench.exe (Google Benchmark)
 echo   - performance_benchmark.exe (Performance comparison)
+echo   - advanced_benchmark.exe (Advanced GEMM benchmarks)
 echo   - basic_usage.exe (basic C++ examples)
 echo   - advanced_usage.exe (advanced C++ examples)
 echo   - hatrix.pyd (Python module)
@@ -72,6 +78,7 @@ echo.
 echo To run benchmarks:
 echo   .\Release\benchmark_hadamard_gbench.exe --benchmark_format=console
 echo   .\Release\performance_benchmark.exe --benchmark_format=console
+echo   .\Release\advanced_benchmark.exe --benchmark_format=console
 echo.
 echo To test Python bindings:
 echo   python ..\examples\python_basic_usage.py

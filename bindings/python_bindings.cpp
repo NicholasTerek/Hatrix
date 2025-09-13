@@ -155,7 +155,7 @@ PYBIND11_MODULE(hatrix, m) {
         auto vector = numpy_to_vector(data);
         hatrix::simd::aligned_vector<double> aligned_data(vector.begin(), vector.end());
         auto result = hatrix::simd::FWHTOptimized::fwht_parallel(aligned_data);
-        return vector_to_numpy(hatrix::dvector_t(result.begin(), result.end()));
+        return vector_to_numpy(hadamard::dvector_t(result.begin(), result.end()));
     }, py::arg("data"), "Optimized Fast Walsh-Hadamard Transform with SIMD and threading");
     
     m.def("ifwht", [](py::array_t<double> data) -> py::array_t<double> {
@@ -168,7 +168,7 @@ PYBIND11_MODULE(hatrix, m) {
         auto vector = numpy_to_vector(data);
         hatrix::simd::aligned_vector<double> aligned_data(vector.begin(), vector.end());
         auto result = hatrix::simd::FWHTOptimized::fwht_parallel(aligned_data);
-        return vector_to_numpy(hatrix::dvector_t(result.begin(), result.end()));
+        return vector_to_numpy(hadamard::dvector_t(result.begin(), result.end()));
     }, py::arg("data"), "Optimized Inverse Fast Walsh-Hadamard Transform");
     
     //----------------------------------------------------------------------

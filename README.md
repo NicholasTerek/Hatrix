@@ -1,7 +1,7 @@
 # Hatrix
 
 A **high-performance** header-only C++17 library for **Hadamard matrices** and the **Fast Walsh–Hadamard Transform (FWHT)**.  
-Features SIMD vectorization, multi-threading, cache optimization, and Python bindings for large-scale ML experiments.
+Features SIMD vectorization, multi-threading, cache optimization, and Python bindings for mathematical computing and ML experiments.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![C++17](https://img.shields.io/badge/C++-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
@@ -31,7 +31,7 @@ Features SIMD vectorization, multi-threading, cache optimization, and Python bin
 ### ✅ High-Performance Features
 - **SIMD vectorization** - AVX2/AVX-512 optimized transforms and matrix operations
 - **Multi-threading** - Parallel processing for large-scale computations
-- **Cache optimization** - Memory-aligned data layouts for maximum bandwidth
+- **Cache optimization** - Memory-aligned data layouts for optimal bandwidth utilization
 - **Batch processing** - Efficient handling of multiple signals for ML experiments
 
 ### ✅ Production Ready
@@ -140,9 +140,9 @@ result = hx.multiply_optimized(H_optimized, np.arange(512, dtype=np.int32))
 
 ### Performance Features
 
-- **SIMD vectorization** - 2-8x speedup with AVX2/AVX-512
+- **SIMD vectorization** - AVX2/AVX-512 support for vectorized operations
 - **Multi-threading** - Parallel processing across CPU cores
-- **Cache optimization** - Memory-aligned data for maximum bandwidth
+- **Cache optimization** - Memory-aligned data for optimal bandwidth utilization
 - **Batch processing** - Efficient handling of multiple signals
 - **Automatic optimization** - CPU feature detection and selection
 
@@ -243,34 +243,30 @@ std::cout << data << std::endl;
 
 ## Performance
 
-The library achieves exceptional performance through SIMD vectorization, multi-threading, and cache optimization:
+The library includes high-performance optimizations including SIMD vectorization, multi-threading, and cache optimization:
 
-### Optimized vs Naive Performance
+### Key Optimizations
 
-| Operation | Size | Naive (ms) | Optimized (ms) | Speedup |
-|-----------|------|------------|----------------|---------|
-| Matrix Generation | 1024×1024 | 45.2 | 12.8 | **3.5x** |
-| FWHT | 4096 | 18.5 | 3.2 | **5.8x** |
-| Matrix Transpose | 512×512 | 2.1 | 0.4 | **5.2x** |
-| Batch FWHT | 1000×1024 | 1250.0 | 180.0 | **6.9x** |
+- **SIMD vectorization** - AVX2/AVX-512 support for vectorized operations
+- **Multi-threading** - Parallel processing for large-scale computations  
+- **Cache optimization** - Memory-aligned data layouts and cache-aware algorithms
+- **Batch processing** - Efficient handling of multiple signals for ML experiments
 
-### Scalability
+### Performance Features
 
-| Size | Generation (ms) | FWHT (ms) | Memory (MB) | Throughput (GB/s) |
-|------|-----------------|-----------|-------------|-------------------|
-| 64   | 0.1            | 0.05      | 0.016       | 12.5              |
-| 256  | 0.8            | 0.2       | 0.256       | 15.2              |
-| 1024 | 12.8           | 3.2       | 4.096       | 18.7              |
-| 4096 | 185.4          | 51.2      | 65.536      | 22.1              |
+- **Automatic CPU detection** - Runtime detection of AVX2, AVX-512, and FMA capabilities
+- **Thread scaling** - Utilizes all available CPU cores efficiently
+- **Memory efficiency** - Cache-optimized layouts for better memory bandwidth utilization
+- **Fallback support** - Graceful degradation for unsupported CPU features
 
-### ML-Scale Performance
+### Benchmarking
 
-- **Large matrices**: Generate 2048×2048 matrices in <500ms
-- **Batch processing**: Process 1000 signals of size 1024 in <200ms
-- **Memory efficiency**: Cache-optimized layouts reduce memory bandwidth by 40%
-- **Thread scaling**: Near-linear speedup up to 16 cores
+The library includes comprehensive benchmarks to measure performance:
+- Run `./performance_benchmark` for detailed performance analysis
+- Run `./advanced_benchmark` for GEMM and advanced optimization benchmarks
+- Use Python `python examples/python_performance_demo.py` for interactive performance testing
 
-*Benchmarks run on Intel i7-12700K with AVX2, compiled with MSVC 2022 in Release mode.*
+*Performance will vary based on your specific hardware configuration and compiler optimizations.*
 
 ## API Reference
 

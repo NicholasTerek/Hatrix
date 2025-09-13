@@ -570,10 +570,8 @@ public:
         return results;
     }
     
-private:
-    ThreadPool thread_pool_;
-    
-    bool validate_matrix_fast(const CacheOptimizedMatrix<int>& matrix) {
+    // Public validation function for testing
+    static bool validate_matrix_fast(const CacheOptimizedMatrix<int>& matrix) {
         int n = matrix.rows();
         if (n != matrix.cols()) return false;
         
@@ -594,6 +592,9 @@ private:
         
         return true;  // Skip expensive check for large matrices
     }
+    
+private:
+    ThreadPool thread_pool_;
     
     bool check_orthogonality_fast(const CacheOptimizedMatrix<int>& matrix) {
         int n = matrix.rows();

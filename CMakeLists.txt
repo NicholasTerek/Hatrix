@@ -73,6 +73,13 @@ set_target_properties(hatrix PROPERTIES
 find_package(Threads REQUIRED)
 target_link_libraries(hatrix INTERFACE Threads::Threads)
 
+# Add OpenMP for parallel processing
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(hatrix INTERFACE OpenMP::OpenMP_CXX)
+    target_compile_options(hatrix INTERFACE $<$<COMPILE_LANGUAGE:CXX>:$<TARGET_PROPERTY:OpenMP::OpenMP_CXX,INTERFACE_COMPILE_OPTIONS>>)
+endif()
+
 # Add SIMD support
 if(NOT MSVC)
     target_compile_options(hatrix INTERFACE -mavx2 -mfma)
@@ -100,22 +107,31 @@ if(BUILD_TESTS)
     )
     FetchContent_MakeAvailable(googletest)
     
-    # Add Google Test executable
+    # Add Google Test executables
     add_executable(test_hadamard_gtest test/test_hadamard_gtest.cpp)
     target_link_libraries(test_hadamard_gtest hatrix gtest_main)
     
-    # Add test
+    add_executable(test_performance_gtest test/test_performance_gtest.cpp)
+    target_link_libraries(test_performance_gtest hatrix gtest_main)
+    
+    # Add tests
     add_test(NAME hadamard_gtest COMMAND test_hadamard_gtest)
+    add_test(NAME performance_gtest COMMAND test_performance_gtest)
     
     # Set test properties
     set_tests_properties(hadamard_gtest PROPERTIES
         TIMEOUT 300
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
+    set_tests_properties(performance_gtest PROPERTIES
+        TIMEOUT 600
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
     
     # Include Google Test in project
     include(GoogleTest)
     gtest_discover_tests(test_hadamard_gtest)
+    gtest_discover_tests(test_performance_gtest)
 endif()
 
 #----------------------------------------------------------------------
@@ -137,9 +153,13 @@ if(BUILD_BENCHMARKS)
     add_executable(benchmark_hadamard_gbench bench/benchmark_hadamard_gbench.cpp)
     target_link_libraries(benchmark_hadamard_gbench hatrix benchmark::benchmark benchmark::benchmark_main)
     
-    # Add performance benchmark executable
+    # Add performance benchmark executables
     add_executable(performance_benchmark bench/performance_benchmark.cpp)
     target_link_libraries(performance_benchmark hatrix benchmark::benchmark benchmark::benchmark_main)
+    
+    # Add advanced benchmark executable
+    add_executable(advanced_benchmark bench/advanced_benchmark.cpp)
+    target_link_libraries(advanced_benchmark hatrix benchmark::benchmark benchmark::benchmark_main)
 endif()
 
 #----------------------------------------------------------------------
