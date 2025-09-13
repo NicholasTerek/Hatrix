@@ -45,6 +45,13 @@
 #include <string>
 #include <functional>
 
+// Hatrix internal headers - High-quality implementations inspired by industry leaders
+#include "hatrix_exceptions.hpp"
+#include "hatrix_logging.hpp"
+#include "hatrix_format.hpp"
+#include "hatrix_containers.hpp"
+#include "hatrix_config.hpp"
+
 namespace hadamard {
 
 //--------------------------------------------------------------------------
@@ -56,14 +63,29 @@ static constexpr const char* library_author  = "Nicholas Terek";
 //--------------------------------------------------------------------------
 // TYPE ALIASES
 //--------------------------------------------------------------------------
-// Matrix is a vector of vector of ints (+1 or -1)
+// Use custom containers inspired by Boost for better performance and features
 using matrix_t = std::vector<std::vector<int>>;
-// Vector type for multiplication
 using vector_t = std::vector<int>;
-// Double precision vector for transforms
 using dvector_t = std::vector<double>;
-// Matrix properties type
 using properties_t = std::unordered_map<std::string, double>;
+
+// Small vector optimization for small matrices
+template<std::size_t N>
+using small_matrix_t = hatrix::containers::small_vector<hatrix::containers::small_vector<int, N>, N>;
+
+// Aligned vectors for SIMD optimization
+template<std::size_t Alignment = 64>
+using aligned_vector_t = hatrix::containers::aligned_vector<int, Alignment>;
+
+template<std::size_t Alignment = 64>
+using aligned_dvector_t = hatrix::containers::aligned_vector<double, Alignment>;
+
+// Optional types for safer programming (using std::optional)
+using optional_matrix_t = std::optional<matrix_t>;
+using optional_dvector_t = std::optional<dvector_t>;
+
+// String view for efficient string handling
+using string_view_t = std::string_view;
 
 //--------------------------------------------------------------------------
 // ENUMERATIONS
@@ -86,14 +108,17 @@ enum class format_t {
 // INTERNAL: Validate order
 //--------------------------------------------------------------------------
 inline void validate_order(int n) {
+    HATRIX_DEBUG("Validating Hadamard matrix order: " + std::to_string(n));
+    
     if (n <= 0) {
-        throw std::invalid_argument("[Hadamard] Order must be positive: received " + std::to_string(n));
+        HATRIX_THROW(exceptions::InvalidMatrixSize, static_cast<std::size_t>(n));
     }
+    
     if ((n & (n - 1)) != 0) {
-        std::ostringstream oss;
-        oss << "[Hadamard] Invalid order: " << n << ". Must be power of two (1,2,4,8,16,...).";
-        throw std::invalid_argument(oss.str());
+        HATRIX_THROW(exceptions::InvalidMatrixSize, static_cast<std::size_t>(n));
     }
+    
+    HATRIX_DEBUG("Order validation passed for size: " + std::to_string(n));
 }
 
 //--------------------------------------------------------------------------
@@ -126,10 +151,16 @@ inline int gray_to_binary(int n) {
 //           H(n) -H(n) ]
 //--------------------------------------------------------------------------
 inline matrix_t generate_recursive(int n) {
+    HATRIX_PERFORMANCE_TIMER_DEBUG("generate_recursive_" + std::to_string(n));
+    
     validate_order(n);
+    
     if (n == 1) {
+        HATRIX_DEBUG("Generating base case H(1)");
         return matrix_t{{+1}};
     }
+    
+    HATRIX_DEBUG("Generating H(" + std::to_string(n) + ") using recursive Sylvester construction");
     const int half = n / 2;
     matrix_t Hh = generate_recursive(half);
     matrix_t H(n, std::vector<int>(n));

@@ -45,6 +45,10 @@ echo.
 echo Running Google Test tests...
 ctest --config Release --verbose
 
+echo.
+echo Running Enterprise Features Test...
+.\Release\test_enterprise_features.exe
+
 REM Run benchmarks
 echo.
 echo Running Google Benchmark...

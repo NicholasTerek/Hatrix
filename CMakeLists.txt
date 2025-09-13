@@ -80,6 +80,10 @@ if(OpenMP_CXX_FOUND)
     target_compile_options(hatrix INTERFACE $<$<COMPILE_LANGUAGE:CXX>:$<TARGET_PROPERTY:OpenMP::OpenMP_CXX,INTERFACE_COMPILE_OPTIONS>>)
 endif()
 
+# Hatrix uses custom implementations inspired by high-quality libraries
+# No external dependencies required - everything is self-contained
+message(STATUS "Using custom implementations inspired by Boost, fmt, and spdlog")
+
 # Add SIMD support
 if(NOT MSVC)
     target_compile_options(hatrix INTERFACE -mavx2 -mfma)
@@ -114,9 +118,13 @@ if(BUILD_TESTS)
     add_executable(test_performance_gtest test/test_performance_gtest.cpp)
     target_link_libraries(test_performance_gtest hatrix gtest_main)
     
+    add_executable(test_enterprise_features test/test_enterprise_features.cpp)
+    target_link_libraries(test_enterprise_features hatrix gtest_main)
+    
     # Add tests
     add_test(NAME hadamard_gtest COMMAND test_hadamard_gtest)
     add_test(NAME performance_gtest COMMAND test_performance_gtest)
+    add_test(NAME enterprise_features COMMAND test_enterprise_features)
     
     # Set test properties
     set_tests_properties(hadamard_gtest PROPERTIES
