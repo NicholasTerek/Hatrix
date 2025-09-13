@@ -1,0 +1,81 @@
+[build-system]
+requires = ["setuptools>=42", "wheel", "pybind11>=2.6.0", "cmake>=3.12"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hatrix"
+version = "1.0.0"
+description = "Header-only C++17 library for Hadamard matrices and Fast Walsh-Hadamard Transform"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Nicholas Terek", email = "nicholas.terek@example.com"}
+]
+maintainers = [
+    {name = "Nicholas Terek", email = "nicholas.terek@example.com"}
+]
+keywords = ["hadamard", "matrix", "walsh", "transform", "signal", "processing", "mathematics"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: C++",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.6"
+dependencies = [
+    "numpy>=1.14.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-benchmark>=3.4.0",
+    "matplotlib>=3.0.0",
+    "scipy>=1.0.0",
+]
+docs = [
+    "sphinx>=4.0.0",
+    "sphinx-rtd-theme>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/hatrix"
+Repository = "https://github.com/yourusername/hatrix"
+Documentation = "https://github.com/yourusername/hatrix#readme"
+"Bug Tracker" = "https://github.com/yourusername/hatrix/issues"
+
+[tool.setuptools]
+packages = ["hatrix"]
+
+[tool.setuptools.package-data]
+hatrix = ["*.py"]
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.coverage.run]
+source = ["hatrix"]
+omit = ["*/test*", "*/tests/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+]
