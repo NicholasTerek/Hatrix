@@ -36,6 +36,15 @@ endif()
 
 enable_testing()
 
+add_executable(hatrix_bench
+    bench/cpp_bench.cpp
+)
+
+target_link_libraries(hatrix_bench
+    PRIVATE
+        hatrix
+)
+
 add_executable(hatrix_cpp_tests
     test/matrix_cpp_tests.cpp
 )
