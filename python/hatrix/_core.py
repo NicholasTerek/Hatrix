@@ -91,6 +91,9 @@ _LIB.hatrix_matrix_add.restype = ctypes.c_void_p
 _LIB.hatrix_matrix_multiply.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
 _LIB.hatrix_matrix_multiply.restype = ctypes.c_void_p
 
+_LIB.hatrix_matrix_multiply_loop_reordered.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+_LIB.hatrix_matrix_multiply_loop_reordered.restype = ctypes.c_void_p
+
 _LIB.hatrix_matrix_transpose.argtypes = [ctypes.c_void_p]
 _LIB.hatrix_matrix_transpose.restype = ctypes.c_void_p
 
@@ -206,6 +209,11 @@ class Matrix:
 
     def multiply(self, other: "Matrix") -> "Matrix":
         return Matrix._from_handle(_LIB.hatrix_matrix_multiply(self._handle, other._handle))
+
+    def multiply_loop_reordered(self, other: "Matrix") -> "Matrix":
+        return Matrix._from_handle(
+            _LIB.hatrix_matrix_multiply_loop_reordered(self._handle, other._handle)
+        )
 
     def transpose(self) -> "Matrix":
         return Matrix._from_handle(_LIB.hatrix_matrix_transpose(self._handle))

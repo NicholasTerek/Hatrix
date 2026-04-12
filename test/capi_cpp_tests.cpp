@@ -109,6 +109,25 @@ void test_is_hadamard_returns_zero_for_non_hadamard_matrix() {
     require_equal(hatrix_matrix_is_hadamard(matrix.handle), 0, "is_hadamard should reject invalid matrices");
 }
 
+void test_multiply_loop_reordered_matches_baseline() {
+    const double left_values[] = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
+    const double right_values[] = {7.0, 8.0, 9.0, 10.0, 11.0, 12.0};
+    HandleGuard left{hatrix_matrix_create_from_data(2, 3, left_values, 6)};
+    HandleGuard right{hatrix_matrix_create_from_data(3, 2, right_values, 6)};
+    HandleGuard baseline{hatrix_matrix_multiply(left.handle, right.handle)};
+    HandleGuard reordered{hatrix_matrix_multiply_loop_reordered(left.handle, right.handle)};
+
+    require_true(reordered.handle != nullptr, "loop-reordered multiply should succeed");
+    require_equal(
+        hatrix_matrix_get(reordered.handle, 0, 0),
+        hatrix_matrix_get(baseline.handle, 0, 0),
+        "loop-reordered multiply should match baseline");
+    require_equal(
+        hatrix_matrix_get(reordered.handle, 1, 1),
+        hatrix_matrix_get(baseline.handle, 1, 1),
+        "loop-reordered multiply should match baseline");
+}
+
 void test_save_and_load_round_trip() {
     const auto path = (std::filesystem::temp_directory_path() / "hatrix_capi_matrix_io.txt").string();
     const double values[] = {1.0, -1.0, -1.0, 1.0};
@@ -139,6 +158,7 @@ int main() {
         {"swap_rows_rejects_out_of_range_index", test_swap_rows_rejects_out_of_range_index},
         {"normalize_rejects_non_square_matrix", test_normalize_rejects_non_square_matrix},
         {"is_hadamard_returns_zero_for_non_hadamard_matrix", test_is_hadamard_returns_zero_for_non_hadamard_matrix},
+        {"multiply_loop_reordered_matches_baseline", test_multiply_loop_reordered_matches_baseline},
         {"save_and_load_round_trip", test_save_and_load_round_trip},
         {"load_rejects_missing_file", test_load_rejects_missing_file},
     };

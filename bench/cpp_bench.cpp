@@ -5,6 +5,7 @@
 #include "Hatrix/Matrix.h"
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <cstdint>
 #include <cstdlib>
@@ -69,6 +70,7 @@ std::vector<double> generate_values(std::size_t rows, std::size_t cols, std::uin
 }
 
 struct BenchmarkResult {
+    std::string implementation;
     std::size_t size;
     int iterations;
     double median_ms;
@@ -76,7 +78,22 @@ struct BenchmarkResult {
     double checksum;
 };
 
-BenchmarkResult run_benchmark(std::size_t size) {
+using MultiplyFunction = Hatrix::Matrix (*)(const Hatrix::Matrix&, const Hatrix::Matrix&);
+
+Hatrix::Matrix multiply_baseline(const Hatrix::Matrix& left, const Hatrix::Matrix& right) {
+    return left.multiply(right);
+}
+
+Hatrix::Matrix multiply_loop_reordered_impl(
+    const Hatrix::Matrix& left,
+    const Hatrix::Matrix& right) {
+    return left.multiply_loop_reordered(right);
+}
+
+BenchmarkResult run_benchmark(
+    const std::string& implementation,
+    MultiplyFunction multiply_function,
+    std::size_t size) {
     const auto left_values = generate_values(size, size, 1u);
     const auto right_values = generate_values(size, size, 2u);
 
@@ -89,14 +106,14 @@ BenchmarkResult run_benchmark(std::size_t size) {
     volatile double checksum = 0.0;
 
     {
-        const auto warmup = left.multiply(right);
+        const auto warmup = multiply_function(left, right);
         checksum = warmup.get(0, 0);
     }
 
     const int iterations = iterations_for_size(size);
     for (int i = 0; i < iterations; ++i) {
         const auto start = Clock::now();
-        const auto result = left.multiply(right);
+        const auto result = multiply_function(left, right);
         const auto end = Clock::now();
 
         const auto elapsed =
@@ -107,6 +124,7 @@ BenchmarkResult run_benchmark(std::size_t size) {
 
     const double median = median_ms(samples);
     return BenchmarkResult{
+        implementation,
         size,
         iterations,
         median,
@@ -115,43 +133,91 @@ BenchmarkResult run_benchmark(std::size_t size) {
     };
 }
 
+std::vector<std::string> parse_implementations(int argc, char** argv) {
+    if (argc >= 3 && std::string(argv[1]) == "--impl") {
+        if (std::string(argv[2]) == "all") {
+            return {"baseline", "loop-reordered"};
+        }
+        return {argv[2]};
+    }
+    if (argc >= 2 && std::string(argv[1]).rfind("--impl=", 0) == 0) {
+        const auto value = std::string(argv[1]).substr(7);
+        if (value == "all") {
+            return {"baseline", "loop-reordered"};
+        }
+        return {value};
+    }
+    return {"all"};
+}
+
 std::vector<std::size_t> parse_sizes(int argc, char** argv) {
-    if (argc <= 1) {
+    int start = 1;
+    if (argc >= 3 && std::string(argv[1]) == "--impl") {
+        start = 3;
+    } else if (argc >= 2 && std::string(argv[1]).rfind("--impl=", 0) == 0) {
+        start = 2;
+    }
+
+    if (argc >= start + 2 && std::string(argv[start]) == "--preset") {
+        return preset_sizes(argv[start + 1]);
+    }
+    if (argc >= start + 1 && std::string(argv[start]).rfind("--preset=", 0) == 0) {
+        return preset_sizes(std::string(argv[start]).substr(9));
+    }
+
+    if (argc <= start) {
         return preset_sizes("default");
     }
 
     std::vector<std::size_t> sizes;
-    int start = 1;
-    if (argc >= 3 && std::string(argv[1]) == "--preset") {
-        return preset_sizes(argv[2]);
-    }
-    if (argc >= 2 && std::string(argv[1]).rfind("--preset=", 0) == 0) {
-        return preset_sizes(std::string(argv[1]).substr(9));
-    }
-
     for (int i = start; i < argc; ++i) {
         sizes.push_back(static_cast<std::size_t>(std::stoul(argv[i])));
     }
     return sizes;
 }
 
+MultiplyFunction implementation_function(const std::string& implementation) {
+    if (implementation == "baseline") {
+        return &multiply_baseline;
+    }
+    if (implementation == "loop-reordered") {
+        return &multiply_loop_reordered_impl;
+    }
+    throw std::invalid_argument("unknown implementation: " + implementation);
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
+    const auto implementations = parse_implementations(argc, argv);
     const auto sizes = parse_sizes(argc, argv);
 
     std::cout << "# Hatrix C++ GEMM Benchmark\n\n";
-    std::cout << "| Size | Iterations | Median ms | GFLOP/s | Checksum |\n";
-    std::cout << "| --- | ---: | ---: | ---: | ---: |\n";
+    std::cout << "| Impl | Size | Iterations | Median ms | GFLOP/s | Checksum |\n";
+    std::cout << "| --- | ---: | ---: | ---: | ---: | ---: |\n";
 
-    for (std::size_t size : sizes) {
-        const auto result = run_benchmark(size);
-        std::cout << "| " << result.size
+    for (const auto& implementation : implementations) {
+        const auto current_implementation =
+            implementation == "all"
+                ? std::array<std::string, 2>{"baseline", "loop-reordered"}
+                : std::array<std::string, 2>{implementation, ""};
+
+        for (const auto& implementation_name : current_implementation) {
+            if (implementation_name.empty()) {
+                continue;
+            }
+            for (std::size_t size : sizes) {
+                const auto result =
+                    run_benchmark(implementation_name, implementation_function(implementation_name), size);
+                std::cout << "| " << result.implementation
+                  << " | " << result.size
                   << " | " << result.iterations
                   << " | " << std::fixed << std::setprecision(3) << result.median_ms
                   << " | " << std::fixed << std::setprecision(3) << result.gflops
                   << " | " << std::fixed << std::setprecision(3) << result.checksum
                   << " |\n";
+            }
+        }
     }
 
     return EXIT_SUCCESS;

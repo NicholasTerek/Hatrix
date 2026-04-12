@@ -112,6 +112,25 @@ Matrix Matrix::multiply(const Matrix& other) const {
     return result;
 }
 
+Matrix Matrix::multiply_loop_reordered(const Matrix& other) const {
+    if (cols_ != other.rows_) {
+        throw std::invalid_argument("matrix dimensions are incompatible for multiplication");
+    }
+
+    Matrix result(rows_, other.cols_);
+    for (std::size_t row = 0; row < rows_; ++row) {
+        for (std::size_t inner = 0; inner < cols_; ++inner) {
+            const double left_value = values_[row * cols_ + inner];
+            for (std::size_t col = 0; col < other.cols_; ++col) {
+                result.values_[row * other.cols_ + col] +=
+                    left_value * other.values_[inner * other.cols_ + col];
+            }
+        }
+    }
+
+    return result;
+}
+
 Matrix Matrix::transpose() const {
     Matrix result(cols_, rows_);
     for (std::size_t row = 0; row < rows_; ++row) {
