@@ -8,6 +8,7 @@ import argparse
 import statistics
 import time
 from random import Random
+from typing import Callable
 
 from hatrix import Matrix
 
@@ -48,18 +49,29 @@ def gflops_for_square_gemm(size: int, milliseconds: float) -> float:
 
 
 def benchmark_hatrix(size: int) -> tuple[float, float]:
+    return benchmark_hatrix_with_impl(size, "baseline")
+
+
+def benchmark_hatrix_with_impl(size: int, implementation: str) -> tuple[float, float]:
     left = Matrix(size, size, generate_values(size, 1))
     right = Matrix(size, size, generate_values(size, 2))
+    multiply: Callable[[Matrix, Matrix], Matrix]
+    if implementation == "baseline":
+        multiply = lambda a, b: a @ b
+    elif implementation == "loop-reordered":
+        multiply = lambda a, b: a.multiply_loop_reordered(b)
+    else:
+        raise ValueError(f"unknown implementation: {implementation}")
 
     samples: list[float] = []
     checksum = 0.0
 
-    warmup = left @ right
+    warmup = multiply(left, right)
     checksum += warmup[0, 0]
 
     for _ in range(iterations_for_size(size)):
         start = time.perf_counter_ns()
-        result = left @ right
+        result = multiply(left, right)
         elapsed_ms = (time.perf_counter_ns() - start) / 1_000_000.0
         samples.append(elapsed_ms)
         checksum += result[0, 0] + result[size - 1, size - 1]
@@ -99,30 +111,40 @@ def main() -> None:
         default="default",
         help="Choose a predefined benchmark size set.",
     )
+    parser.add_argument(
+        "--impl",
+        choices=["baseline", "loop-reordered", "all"],
+        default="all",
+        help="Choose which implementation to benchmark.",
+    )
     args = parser.parse_args()
     sizes = args.sizes if args.sizes else preset_sizes(args.preset)
+    implementations = (
+        ["baseline", "loop-reordered"] if args.impl == "all" else [args.impl]
+    )
 
     print("# Hatrix Python GEMM Benchmark\n")
-    print("| Size | Iterations | Hatrix ms | Hatrix GFLOP/s | NumPy ms | NumPy GFLOP/s |")
-    print("| --- | ---: | ---: | ---: | ---: | ---: |")
+    print("| Impl | Size | Iterations | Hatrix ms | Hatrix GFLOP/s | NumPy ms | NumPy GFLOP/s |")
+    print("| --- | ---: | ---: | ---: | ---: | ---: | ---: |")
 
-    for size in sizes:
-        hatrix_ms, _ = benchmark_hatrix(size)
-        hatrix_gflops = gflops_for_square_gemm(size, hatrix_ms)
+    for implementation in implementations:
+        for size in sizes:
+            hatrix_ms, _ = benchmark_hatrix_with_impl(size, implementation)
+            hatrix_gflops = gflops_for_square_gemm(size, hatrix_ms)
 
-        numpy_result = benchmark_numpy(size)
-        if numpy_result is None:
-            numpy_ms = "n/a"
-            numpy_gflops = "n/a"
-        else:
-            numpy_ms_value, _ = numpy_result
-            numpy_ms = f"{numpy_ms_value:.3f}"
-            numpy_gflops = f"{gflops_for_square_gemm(size, numpy_ms_value):.3f}"
+            numpy_result = benchmark_numpy(size)
+            if numpy_result is None:
+                numpy_ms = "n/a"
+                numpy_gflops = "n/a"
+            else:
+                numpy_ms_value, _ = numpy_result
+                numpy_ms = f"{numpy_ms_value:.3f}"
+                numpy_gflops = f"{gflops_for_square_gemm(size, numpy_ms_value):.3f}"
 
-        print(
-            f"| {size} | {iterations_for_size(size)} | {hatrix_ms:.3f} | "
-            f"{hatrix_gflops:.3f} | {numpy_ms} | {numpy_gflops} |"
-        )
+            print(
+                f"| {implementation} | {size} | {iterations_for_size(size)} | {hatrix_ms:.3f} | "
+                f"{hatrix_gflops:.3f} | {numpy_ms} | {numpy_gflops} |"
+            )
 
     if np is None:
         print("\nNumPy is not installed, so the NumPy comparison columns are unavailable.")

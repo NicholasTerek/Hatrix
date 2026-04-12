@@ -263,6 +263,26 @@ HatrixMatrixHandle* hatrix_matrix_multiply(
     }
 }
 
+HatrixMatrixHandle* hatrix_matrix_multiply_loop_reordered(
+    const HatrixMatrixHandle* left,
+    const HatrixMatrixHandle* right) {
+    clear_error();
+
+    try {
+        if (left == nullptr || right == nullptr) {
+            throw std::invalid_argument("matrix handle is null");
+        }
+        return new HatrixMatrixHandle{
+            left->matrix.multiply_loop_reordered(right->matrix)};
+    } catch (const std::exception& error) {
+        set_error(error);
+        return nullptr;
+    } catch (...) {
+        set_unknown_error();
+        return nullptr;
+    }
+}
+
 HatrixMatrixHandle* hatrix_matrix_transpose(const HatrixMatrixHandle* handle) {
     clear_error();
 

@@ -134,6 +134,31 @@ void test_multiply_returns_expected_values() {
         "multiply should produce standard matrix multiplication");
 }
 
+void test_multiply_loop_reordered_returns_expected_values() {
+    Hatrix::Matrix left(2, 3, std::vector<double>{1.0, 2.0, 3.0, 4.0, 5.0, 6.0});
+    Hatrix::Matrix right(3, 2, std::vector<double>{7.0, 8.0, 9.0, 10.0, 11.0, 12.0});
+    const auto result = left.multiply_loop_reordered(right);
+    require_matrix_equals(
+        result,
+        2,
+        2,
+        std::vector<double>{58.0, 64.0, 139.0, 154.0},
+        "multiply_loop_reordered should produce standard matrix multiplication");
+}
+
+void test_multiply_loop_reordered_matches_baseline() {
+    Hatrix::Matrix left(3, 3, std::vector<double>{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0});
+    Hatrix::Matrix right(3, 3, std::vector<double>{9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0});
+    const auto baseline = left.multiply(right);
+    const auto reordered = left.multiply_loop_reordered(right);
+    require_matrix_equals(
+        reordered,
+        baseline.rows(),
+        baseline.cols(),
+        baseline.values(),
+        "multiply_loop_reordered should match baseline multiply");
+}
+
 void test_multiply_rejects_mismatched_dimensions() {
     Hatrix::Matrix left(2, 2);
     Hatrix::Matrix right(3, 2);
@@ -298,6 +323,8 @@ int main() {
         {"add_returns_expected_values", test_add_returns_expected_values},
         {"add_rejects_mismatched_dimensions", test_add_rejects_mismatched_dimensions},
         {"multiply_returns_expected_values", test_multiply_returns_expected_values},
+        {"multiply_loop_reordered_returns_expected_values", test_multiply_loop_reordered_returns_expected_values},
+        {"multiply_loop_reordered_matches_baseline", test_multiply_loop_reordered_matches_baseline},
         {"multiply_rejects_mismatched_dimensions", test_multiply_rejects_mismatched_dimensions},
         {"transpose_swaps_dimensions_and_values", test_transpose_swaps_dimensions_and_values},
         {"kronecker_expands_shape_and_values", test_kronecker_expands_shape_and_values},

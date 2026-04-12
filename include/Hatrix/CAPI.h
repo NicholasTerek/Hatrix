@@ -48,6 +48,9 @@ HATRIX_EXPORT HatrixMatrixHandle* hatrix_matrix_add(
 HATRIX_EXPORT HatrixMatrixHandle* hatrix_matrix_multiply(
     const HatrixMatrixHandle* left,
     const HatrixMatrixHandle* right);
+HATRIX_EXPORT HatrixMatrixHandle* hatrix_matrix_multiply_loop_reordered(
+    const HatrixMatrixHandle* left,
+    const HatrixMatrixHandle* right);
 HATRIX_EXPORT HatrixMatrixHandle* hatrix_matrix_transpose(const HatrixMatrixHandle* handle);
 HATRIX_EXPORT HatrixMatrixHandle* hatrix_matrix_kronecker(
     const HatrixMatrixHandle* left,
