@@ -112,6 +112,44 @@ Python benchmark:
 | 1000 | 1          | 5025.094  | 0.398          | 9.323    | 214.515       |
 ```
 
+Current issue `#2` snapshot: `baseline` vs `loop-reordered` on `default`
+
+C++ benchmark:
+
+```text
+| Impl           | Size | Median ms | GFLOP/s |
+| baseline       | 128  | 8.869     | 0.473   |
+| baseline       | 256  | 90.040    | 0.373   |
+| baseline       | 384  | 285.146   | 0.397   |
+| baseline       | 512  | 754.249   | 0.356   |
+| baseline       | 768  | 2260.257  | 0.401   |
+| baseline       | 1024 | 5477.922  | 0.392   |
+| loop-reordered | 128  | 8.678     | 0.483   |
+| loop-reordered | 256  | 69.575    | 0.482   |
+| loop-reordered | 384  | 234.745   | 0.482   |
+| loop-reordered | 512  | 563.243   | 0.477   |
+| loop-reordered | 768  | 2139.046  | 0.424   |
+| loop-reordered | 1024 | 4649.936  | 0.462   |
+```
+
+Python benchmark:
+
+```text
+| Impl           | Size | Hatrix ms | Hatrix GFLOP/s | NumPy ms | NumPy GFLOP/s |
+| baseline       | 128  | 8.898     | 0.471          | 0.080    | 52.369        |
+| baseline       | 256  | 72.926    | 0.460          | 1.830    | 18.332        |
+| baseline       | 384  | 251.138   | 0.451          | 12.993   | 8.716         |
+| baseline       | 512  | 639.153   | 0.420          | 11.992   | 22.384        |
+| baseline       | 768  | 2395.825  | 0.378          | 11.983   | 75.601        |
+| baseline       | 1024 | 5385.624  | 0.399          | 15.063   | 142.564       |
+| loop-reordered | 128  | 14.396    | 0.291          | 0.060    | 70.445        |
+| loop-reordered | 256  | 76.948    | 0.436          | 2.954    | 11.359        |
+| loop-reordered | 384  | 247.680   | 0.457          | 9.493    | 11.930        |
+| loop-reordered | 512  | 638.300   | 0.421          | 3.382    | 79.361        |
+| loop-reordered | 768  | 2034.198  | 0.445          | 13.991   | 64.752        |
+| loop-reordered | 1024 | 4983.427  | 0.431          | 10.842   | 198.063       |
+```
+
 **Use from C++**
 
 Headers live in `include/Hatrix`, and the shared library target is `hatrix`.
