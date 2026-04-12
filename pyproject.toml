@@ -1,0 +1,25 @@
+# Hatrix
+# Copyright (c) 2025 Hatrix contributors
+# Licensed under the MIT License. See LICENSE for details.
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hatrix"
+version = "0.1.0"
+description = "Simple C++ matrix library with Python bindings and Hadamard utilities"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [{ name = "nterek" }]
+
+[tool.setuptools]
+package-dir = {"" = "python"}
+
+[tool.setuptools.packages.find]
+where = ["python"]
+
+[tool.setuptools.package-data]
+hatrix = ["*.so", "*.dylib", "*.dll"]

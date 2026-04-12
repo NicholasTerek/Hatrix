@@ -1,41 +1,41 @@
-# Prerequisites
-*.d
+# Build output
+/build/
+/build_python/
+/CMakeFiles/
+/CMakeCache.txt
+/Testing/
+/CTestTestfile.cmake
+/cmake_install.cmake
+/compile_commands.json
+/Makefile
 
-# Compiled Object files
-*.slo
-*.lo
+# C and C++ artifacts
+*.d
 *.o
 *.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Linker files
-*.ilk
-
-# Debugger Files
-*.pdb
-
-# Compiled Dynamic libraries
+*.a
+*.lib
 *.so
 *.dylib
 *.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
 *.exe
 *.out
 *.app
-
-# debug information files
+*.pdb
+*.ilk
 *.dwo
+
+# Python
+__pycache__/
+*.py[cod]
+/python/*.egg-info/
+/python/hatrix/*.so
+/python/hatrix/*.dylib
+/python/hatrix/*.dll
+.venv/
+venv/
+
+# Editors and OS files
+.DS_Store
+.idea/
+.vscode/
