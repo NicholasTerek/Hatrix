@@ -150,6 +150,51 @@ Python benchmark:
 | loop-reordered | 1024 | 4983.427  | 0.431          | 10.842   | 198.063       |
 ```
 
+Current issue `#3` snapshot: inner-dimension tiling on `default`
+
+C++ benchmark:
+
+```text
+| Impl           | Size | Median ms | GFLOP/s |
+| baseline       | 256  | 78.250    | 0.429   |
+| loop-reordered | 256  | 77.949    | 0.430   |
+| inner-tiled-16 | 256  | 71.024    | 0.472   |
+| inner-tiled-32 | 256  | 68.221    | 0.492   |
+| baseline       | 512  | 700.405   | 0.383   |
+| loop-reordered | 512  | 692.512   | 0.388   |
+| inner-tiled-16 | 512  | 607.456   | 0.442   |
+| inner-tiled-32 | 512  | 622.342   | 0.431   |
+| baseline       | 1024 | 5584.051  | 0.385   |
+| loop-reordered | 1024 | 5160.864  | 0.416   |
+| inner-tiled-16 | 1024 | 4950.435  | 0.434   |
+| inner-tiled-32 | 1024 | 4893.797  | 0.439   |
+```
+
+Python benchmark:
+
+```text
+| Impl           | Size | Hatrix ms | Hatrix GFLOP/s |
+| baseline       | 256  | 72.881    | 0.460          |
+| loop-reordered | 256  | 70.578    | 0.475          |
+| inner-tiled-16 | 256  | 78.474    | 0.428          |
+| inner-tiled-32 | 256  | 78.349    | 0.428          |
+| baseline       | 512  | 658.322   | 0.408          |
+| loop-reordered | 512  | 587.295   | 0.457          |
+| inner-tiled-16 | 512  | 617.828   | 0.434          |
+| inner-tiled-32 | 512  | 615.303   | 0.436          |
+| baseline       | 1024 | 5620.385  | 0.382          |
+| loop-reordered | 1024 | 4729.890  | 0.454          |
+| inner-tiled-16 | 1024 | 4916.125  | 0.437          |
+| inner-tiled-32 | 1024 | 4842.155  | 0.443          |
+```
+
+Summary:
+
+- inner tiling clearly improves over the original baseline
+- `inner-tiled-16` and `inner-tiled-32` are the only tiled variants worth keeping
+- on the native benchmark, tiling is the current best approach at the larger tracked sizes
+- on the Python end-to-end benchmark, loop reordering is still slightly ahead at `512` and `1024`
+
 **Use from C++**
 
 Headers live in `include/Hatrix`, and the shared library target is `hatrix`.

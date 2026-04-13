@@ -60,6 +60,10 @@ def benchmark_hatrix_with_impl(size: int, implementation: str) -> tuple[float, f
         multiply = lambda a, b: a @ b
     elif implementation == "loop-reordered":
         multiply = lambda a, b: a.multiply_loop_reordered(b)
+    elif implementation == "inner-tiled-16":
+        multiply = lambda a, b: a.multiply_inner_tiled(b, 16)
+    elif implementation == "inner-tiled-32":
+        multiply = lambda a, b: a.multiply_inner_tiled(b, 32)
     else:
         raise ValueError(f"unknown implementation: {implementation}")
 
@@ -113,15 +117,27 @@ def main() -> None:
     )
     parser.add_argument(
         "--impl",
-        choices=["baseline", "loop-reordered", "all"],
+        choices=[
+            "baseline",
+            "loop-reordered",
+            "inner-tiled-16",
+            "inner-tiled-32",
+            "all",
+        ],
         default="all",
         help="Choose which implementation to benchmark.",
     )
     args = parser.parse_args()
     sizes = args.sizes if args.sizes else preset_sizes(args.preset)
-    implementations = (
-        ["baseline", "loop-reordered"] if args.impl == "all" else [args.impl]
-    )
+    if args.impl == "all":
+        implementations = [
+            "baseline",
+            "loop-reordered",
+            "inner-tiled-16",
+            "inner-tiled-32",
+        ]
+    else:
+        implementations = [args.impl]
 
     print("# Hatrix Python GEMM Benchmark\n")
     print("| Impl | Size | Iterations | Hatrix ms | Hatrix GFLOP/s | NumPy ms | NumPy GFLOP/s |")

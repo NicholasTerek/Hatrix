@@ -28,6 +28,7 @@ public:
     Matrix add(const Matrix& other) const;
     Matrix multiply(const Matrix& other) const;
     Matrix multiply_loop_reordered(const Matrix& other) const;
+    Matrix multiply_inner_tiled(const Matrix& other, std::size_t tile_size) const;
     Matrix transpose() const;
     Matrix kronecker(const Matrix& other) const;
     Matrix normalize() const;

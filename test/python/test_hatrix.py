@@ -55,6 +55,23 @@ class MatrixOperationTests(unittest.TestCase):
         right = Matrix(3, 3, [9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0])
         self.assertMatrixEqual(left.multiply_loop_reordered(right), (left @ right).to_list())
 
+    def test_inner_tiled_multiplication(self) -> None:
+        left = Matrix(2, 3, [1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+        right = Matrix(3, 2, [7.0, 8.0, 9.0, 10.0, 11.0, 12.0])
+        self.assertMatrixEqual(
+            left.multiply_inner_tiled(right, 2),
+            [[58.0, 64.0], [139.0, 154.0]],
+        )
+
+    def test_inner_tiled_multiplication_matches_baseline(self) -> None:
+        left = Matrix(3, 3, [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0])
+        right = Matrix(3, 3, [9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0])
+        self.assertMatrixEqual(left.multiply_inner_tiled(right, 2), (left @ right).to_list())
+
+    def test_inner_tiled_multiplication_rejects_zero_tile_size(self) -> None:
+        with self.assertRaises(RuntimeError):
+            Matrix(2, 2).multiply_inner_tiled(Matrix(2, 2), 0)
+
     def test_set_and_get(self) -> None:
         matrix = Matrix(2, 2)
         matrix.set(1, 0, -7.5)

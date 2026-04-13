@@ -131,6 +131,31 @@ Matrix Matrix::multiply_loop_reordered(const Matrix& other) const {
     return result;
 }
 
+Matrix Matrix::multiply_inner_tiled(const Matrix& other, std::size_t tile_size) const {
+    if (cols_ != other.rows_) {
+        throw std::invalid_argument("matrix dimensions are incompatible for multiplication");
+    }
+    if (tile_size == 0) {
+        throw std::invalid_argument("tile size must be greater than zero");
+    }
+
+    Matrix result(rows_, other.cols_);
+    for (std::size_t inner_tile = 0; inner_tile < cols_; inner_tile += tile_size) {
+        const std::size_t inner_end = std::min(cols_, inner_tile + tile_size);
+        for (std::size_t row = 0; row < rows_; ++row) {
+            for (std::size_t inner = inner_tile; inner < inner_end; ++inner) {
+                const double left_value = values_[row * cols_ + inner];
+                for (std::size_t col = 0; col < other.cols_; ++col) {
+                    result.values_[row * other.cols_ + col] +=
+                        left_value * other.values_[inner * other.cols_ + col];
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
 Matrix Matrix::transpose() const {
     Matrix result(cols_, rows_);
     for (std::size_t row = 0; row < rows_; ++row) {

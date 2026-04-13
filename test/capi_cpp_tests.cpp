@@ -128,6 +128,34 @@ void test_multiply_loop_reordered_matches_baseline() {
         "loop-reordered multiply should match baseline");
 }
 
+void test_multiply_inner_tiled_matches_baseline() {
+    const double left_values[] = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
+    const double right_values[] = {7.0, 8.0, 9.0, 10.0, 11.0, 12.0};
+    HandleGuard left{hatrix_matrix_create_from_data(2, 3, left_values, 6)};
+    HandleGuard right{hatrix_matrix_create_from_data(3, 2, right_values, 6)};
+    HandleGuard baseline{hatrix_matrix_multiply(left.handle, right.handle)};
+    HandleGuard tiled{hatrix_matrix_multiply_inner_tiled(left.handle, right.handle, 2)};
+
+    require_true(tiled.handle != nullptr, "inner-tiled multiply should succeed");
+    require_equal(
+        hatrix_matrix_get(tiled.handle, 0, 0),
+        hatrix_matrix_get(baseline.handle, 0, 0),
+        "inner-tiled multiply should match baseline");
+    require_equal(
+        hatrix_matrix_get(tiled.handle, 1, 1),
+        hatrix_matrix_get(baseline.handle, 1, 1),
+        "inner-tiled multiply should match baseline");
+}
+
+void test_multiply_inner_tiled_rejects_zero_tile_size() {
+    HandleGuard left{hatrix_matrix_create(2, 2)};
+    HandleGuard right{hatrix_matrix_create(2, 2)};
+    clear_error();
+    HandleGuard tiled{hatrix_matrix_multiply_inner_tiled(left.handle, right.handle, 0)};
+    require_true(tiled.handle == nullptr, "inner-tiled multiply should reject zero tile size");
+    require_error_contains("tile size must be greater than zero", "inner-tiled multiply should report bad tile size");
+}
+
 void test_save_and_load_round_trip() {
     const auto path = (std::filesystem::temp_directory_path() / "hatrix_capi_matrix_io.txt").string();
     const double values[] = {1.0, -1.0, -1.0, 1.0};
@@ -159,6 +187,8 @@ int main() {
         {"normalize_rejects_non_square_matrix", test_normalize_rejects_non_square_matrix},
         {"is_hadamard_returns_zero_for_non_hadamard_matrix", test_is_hadamard_returns_zero_for_non_hadamard_matrix},
         {"multiply_loop_reordered_matches_baseline", test_multiply_loop_reordered_matches_baseline},
+        {"multiply_inner_tiled_matches_baseline", test_multiply_inner_tiled_matches_baseline},
+        {"multiply_inner_tiled_rejects_zero_tile_size", test_multiply_inner_tiled_rejects_zero_tile_size},
         {"save_and_load_round_trip", test_save_and_load_round_trip},
         {"load_rejects_missing_file", test_load_rejects_missing_file},
     };

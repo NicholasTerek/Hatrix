@@ -90,6 +90,18 @@ Hatrix::Matrix multiply_loop_reordered_impl(
     return left.multiply_loop_reordered(right);
 }
 
+Hatrix::Matrix multiply_inner_tiled_16_impl(
+    const Hatrix::Matrix& left,
+    const Hatrix::Matrix& right) {
+    return left.multiply_inner_tiled(right, 16);
+}
+
+Hatrix::Matrix multiply_inner_tiled_32_impl(
+    const Hatrix::Matrix& left,
+    const Hatrix::Matrix& right) {
+    return left.multiply_inner_tiled(right, 32);
+}
+
 BenchmarkResult run_benchmark(
     const std::string& implementation,
     MultiplyFunction multiply_function,
@@ -136,14 +148,22 @@ BenchmarkResult run_benchmark(
 std::vector<std::string> parse_implementations(int argc, char** argv) {
     if (argc >= 3 && std::string(argv[1]) == "--impl") {
         if (std::string(argv[2]) == "all") {
-            return {"baseline", "loop-reordered"};
+            return {
+                "baseline",
+                "loop-reordered",
+                "inner-tiled-16",
+                "inner-tiled-32"};
         }
         return {argv[2]};
     }
     if (argc >= 2 && std::string(argv[1]).rfind("--impl=", 0) == 0) {
         const auto value = std::string(argv[1]).substr(7);
         if (value == "all") {
-            return {"baseline", "loop-reordered"};
+            return {
+                "baseline",
+                "loop-reordered",
+                "inner-tiled-16",
+                "inner-tiled-32"};
         }
         return {value};
     }
@@ -183,6 +203,12 @@ MultiplyFunction implementation_function(const std::string& implementation) {
     if (implementation == "loop-reordered") {
         return &multiply_loop_reordered_impl;
     }
+    if (implementation == "inner-tiled-16") {
+        return &multiply_inner_tiled_16_impl;
+    }
+    if (implementation == "inner-tiled-32") {
+        return &multiply_inner_tiled_32_impl;
+    }
     throw std::invalid_argument("unknown implementation: " + implementation);
 }
 
@@ -197,26 +223,16 @@ int main(int argc, char** argv) {
     std::cout << "| --- | ---: | ---: | ---: | ---: | ---: |\n";
 
     for (const auto& implementation : implementations) {
-        const auto current_implementation =
-            implementation == "all"
-                ? std::array<std::string, 2>{"baseline", "loop-reordered"}
-                : std::array<std::string, 2>{implementation, ""};
-
-        for (const auto& implementation_name : current_implementation) {
-            if (implementation_name.empty()) {
-                continue;
-            }
-            for (std::size_t size : sizes) {
-                const auto result =
-                    run_benchmark(implementation_name, implementation_function(implementation_name), size);
-                std::cout << "| " << result.implementation
-                  << " | " << result.size
-                  << " | " << result.iterations
-                  << " | " << std::fixed << std::setprecision(3) << result.median_ms
-                  << " | " << std::fixed << std::setprecision(3) << result.gflops
-                  << " | " << std::fixed << std::setprecision(3) << result.checksum
-                  << " |\n";
-            }
+        for (std::size_t size : sizes) {
+            const auto result =
+                run_benchmark(implementation, implementation_function(implementation), size);
+            std::cout << "| " << result.implementation
+              << " | " << result.size
+              << " | " << result.iterations
+              << " | " << std::fixed << std::setprecision(3) << result.median_ms
+              << " | " << std::fixed << std::setprecision(3) << result.gflops
+              << " | " << std::fixed << std::setprecision(3) << result.checksum
+              << " |\n";
         }
     }
 

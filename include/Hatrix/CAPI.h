@@ -51,6 +51,10 @@ HATRIX_EXPORT HatrixMatrixHandle* hatrix_matrix_multiply(
 HATRIX_EXPORT HatrixMatrixHandle* hatrix_matrix_multiply_loop_reordered(
     const HatrixMatrixHandle* left,
     const HatrixMatrixHandle* right);
+HATRIX_EXPORT HatrixMatrixHandle* hatrix_matrix_multiply_inner_tiled(
+    const HatrixMatrixHandle* left,
+    const HatrixMatrixHandle* right,
+    std::size_t tile_size);
 HATRIX_EXPORT HatrixMatrixHandle* hatrix_matrix_transpose(const HatrixMatrixHandle* handle);
 HATRIX_EXPORT HatrixMatrixHandle* hatrix_matrix_kronecker(
     const HatrixMatrixHandle* left,
